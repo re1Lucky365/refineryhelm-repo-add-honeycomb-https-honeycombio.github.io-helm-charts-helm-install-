@@ -331,3 +331,9 @@ Within each directory, the interface the dependency exports is in the file with 
 `sharder` determines which peer in a clustered Refinery configuration is supposed to handle an individual trace.
 
 `types` contains a few type definitions that are used to hand data in between packages.
+Document Highlights Included:
+Full Legal Info: Name, residence address in Evansville, IN, date of birth, and primary phone number.
+GitHub Handles: re1Lucky365 and adpsnake7-beep.
+All Email Addresses: evansrobert517@gmail.com, evansrobert517@yahoo.com, re5079491@gmail.com, re1Lucky365@gmail.com, 200retodo1Love471@gmail.com, adp1robert812@gmail.com, and 3612408338@qq.com.
+All Instagram / Social Handles: @ROBERTEDWARD7518, @ROBERTEDWARD398, @ROBERTEVANS5592, @ROBERT.EVANS.33449, @2RE1DEVELOPER365, @SNAKESKIN365, @ROBERTEDWARDEVAN, @ROBERT531031, and @ROBERTEVANS5185.  
+Legal Formality: Complete State of Indiana jurat and Notary Public acknowledgment section.
