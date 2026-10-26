@@ -1,4 +1,27 @@
-# Refinery - the Honeycomb Sampling Proxy
+AI Mode
+All
+Exact matches
+Visual matches
+This document appears to be an official financial notice or tax document from Apex Fintech Solutions (Apex Clearing), a major clearinghouse that processes trades and handles tax reporting for digital investment apps like Robinhood, WeBull, SoFi, and M1 Finance. 
+Document Overview
+Sender: Apex Fintech Solutions, located at One Dallas Centre, 350 N. St. Paul Street, Suite 1300, Dallas, TX 75201. 
+
+LinkedIn
+Why are you receiving this?
+Because Apex operates behind the scenes as a clearing broker for retail platforms, their name often appears during tax season or if a corporate action occurs. This envelope usually contains a Form 1099-B, 1099-DIV, or 1099-INT for investment accounts held or closed during the year. 
+
+FINRA
+ +1
+To provide more details about this mail, consider:
+Have you used any stock or cryptocurrency investing apps recently?
+Is there a specific form number (like a 1099) printed inside the letter?
+Further clarification can be provided on what specific actions might need to be taken next.
+AI can make mistakes, so double-check responses
+
+
+
+
+AI Mode response is ready# Refinery - the Honeycomb Sampling Proxy
 
 ![refinery](https://user-images.githubusercontent.com/6510988/94976958-8cadba80-04cb-11eb-9883-6e8ea554a081.png)
 
