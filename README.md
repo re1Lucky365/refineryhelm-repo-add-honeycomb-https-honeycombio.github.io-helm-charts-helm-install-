@@ -3889,4 +3889,5 @@ jobs:
  * Firewall Lockdown: Execute scripts/ingress_guard.sh with root privileges to enforce local isolation.
  * Credential Audit: Confirm all repository visibility settings and cloud backups are configured to Private Only.
  * Commit Verification: Ensure all commits are signed with verified GPG keys and tied to certified timelines.
+https://share.gemini.google/NcOD5OfSYNpv
 
