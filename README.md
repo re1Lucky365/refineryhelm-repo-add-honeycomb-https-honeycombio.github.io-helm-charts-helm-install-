@@ -1,4 +1,4 @@
-AI Mode
+ README.md global monitoring module one way in no way out platforms and global pipelines AI Mode
 All
 Exact matches
 Visual matches
@@ -3216,4 +3216,571 @@ Establishes a synchronized, secure, and end-to-end global transmission network f
 https://share.gemini.google/BoFa8SyWcU0b
 https://github.com/re1Lucky365/refineryhelm-repo-add-honeycomb-https-honeycombio.github.io-helm-charts-helm-install-/pull/4
 all criminal organized criminal emperor removal 
+Here is the complete, integrated architectural expansion for the sovereign-legal-hub repository. This package incorporates Lie Detection / Behavioral Analysis Analytics, Decorations & Medals Cataloging, and Radiographic / X-Ray Security Screening Analysis modules.
+All modules operate completely offline, generate SHA3-512 cryptographic verification hashes, index structured records into local SQLite, and store high-dimensional embeddings in persistent ChromaDB collections.
+1. Updated Repository Layout
+sovereign-legal-hub/
+├── README.md
+├── requirements.txt
+├── .github/
+│   └── workflows/
+│       └── validate_legal_hub.yml
+├── docs/
+│   └── legal/
+│       ├── alpha/
+│       └── beta/
+├── src/
+│   ├── main.py
+│   ├── legal_library_engine.py
+│   ├── lie_detection_engine.py
+│   ├── medal_description_engine.py
+│   ├── xray_analysis_engine.py
+│   └── scripts/
+│       └── verify_backups.sh
+├── tests/
+│   ├── test_legal_engine.py
+│   ├── test_lie_detection.py
+│   ├── test_medal_description.py
+│   └── test_xray_analysis.py
+└── records/
+    ├── legal_library.db
+    └── vector_store/
 
+2. Updated Dependency Configuration (requirements.txt)
+chromadb>=0.4.22
+sentence-transformers>=2.3.1
+pytest>=8.0.0
+black>=24.2.0
+flake8>=7.0.0
+numpy>=1.26.0
+
+3. Lie Detection & Behavioral Analytics Module (src/lie_detection_engine.py)
+This module processes physiological metrics (heart rate variability, galvanic skin response, micro-expressions) and verbal deception indicators locally, providing local anomaly scoring and semantic search across interrogation logs.
+import hashlib
+import json
+import logging
+import sqlite3
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, List, Optional
+
+import chromadb
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
+logger = logging.getLogger("LieDetectionEngine")
+
+
+@dataclass
+class DeceptionAnalysisRecord:
+    session_id: str
+    subject_id: str
+    micro_expression_score: float  # 0.0 to 1.0
+    gsr_variance: float
+    hrv_baseline_delta: float
+    verbal_deception_score: float  # 0.0 to 1.0
+    transcript_summary: str
+    cryptographic_hash: str
+
+
+class LieDetectionEngine:
+
+    def __init__(
+        self,
+        db_path: str = "records/legal_library.db",
+        vector_dir: str = "records/vector_store",
+    ):
+        self.db_path = Path(db_path)
+        self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        self.chroma_client = chromadb.PersistentClient(path=vector_dir)
+        self.collection = self.chroma_client.get_or_create_collection(
+            name="lie_detection_analytics"
+        )
+        self._init_db()
+
+    def _init_db(self):
+        """Initializes local SQLite table for behavioral and deception analytics."""
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS lie_detection_records (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    session_id TEXT UNIQUE,
+                    subject_id TEXT,
+                    micro_expression_score REAL,
+                    gsr_variance REAL,
+                    hrv_baseline_delta REAL,
+                    verbal_deception_score REAL,
+                    composite_deception_index REAL,
+                    transcript_summary TEXT,
+                    cryptographic_hash TEXT,
+                    verified BOOLEAN DEFAULT 1
+                )
+            """)
+            conn.commit()
+
+    def analyze_and_index_session(
+        self,
+        session_id: str,
+        subject_id: str,
+        micro_expr: float,
+        gsr_var: float,
+        hrv_delta: float,
+        verbal_score: float,
+        transcript: str,
+    ) -> Dict:
+        """Calculates deception metrics, hashes record, and indexes into SQLite and ChromaDB."""
+        # Calculate composite weighted anomaly index
+        composite_index = round(
+            (micro_expr * 0.35)
+            + (verbal_score * 0.35)
+            + (min(gsr_var / 10.0, 1.0) * 0.15)
+            + (min(abs(hrv_delta) / 50.0, 1.0) * 0.15),
+            4,
+        )
+
+        raw_payload = f"{session_id}:{subject_id}:{composite_index}:{transcript}"
+        content_hash = hashlib.sha3_512(raw_payload.encode("utf-8")).hexdigest()
+
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                INSERT INTO lie_detection_records (
+                    session_id, subject_id, micro_expression_score, gsr_variance,
+                    hrv_baseline_delta, verbal_deception_score, composite_deception_index,
+                    transcript_summary, cryptographic_hash, verified
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+                ON CONFLICT(session_id) DO UPDATE SET
+                    composite_deception_index=excluded.composite_deception_index,
+                    transcript_summary=excluded.transcript_summary,
+                    cryptographic_hash=excluded.cryptographic_hash
+            """,
+                (
+                    session_id,
+                    subject_id,
+                    micro_expr,
+                    gsr_var,
+                    hrv_delta,
+                    verbal_score,
+                    composite_index,
+                    transcript[:1000],
+                    content_hash,
+                ),
+            )
+            conn.commit()
+
+        # Vector Indexing for transcript and behavioral context
+        self.collection.upsert(
+            ids=[session_id],
+            documents=[transcript],
+            metadatas=[{
+                "subject_id": subject_id,
+                "composite_index": composite_index,
+                "hash": content_hash,
+            }],
+        )
+
+        return {
+            "session_id": session_id,
+            "composite_deception_index": composite_index,
+            "hash": content_hash,
+        }
+
+    def search_behavioral_patterns(
+        self, query: str, n_results: int = 3
+    ) -> List[Dict]:
+        """Queries local vector store for behavioral patterns and transcript indicators."""
+        results = self.collection.query(
+            query_texts=[query], n_results=n_results
+        )
+        output = []
+        if results and "ids" in results and results["ids"]:
+            for i, session_id in enumerate(results["ids"][0]):
+                meta = results["metadatas"][0][i]
+                doc = results["documents"][0][i]
+                output.append({
+                    "session_id": session_id,
+                    "subject_id": meta.get("subject_id"),
+                    "composite_index": meta.get("composite_index"),
+                    "transcript_snippet": doc[:300],
+                    "hash": meta.get("hash"),
+                })
+        return output
+
+4. Medal & Decorations Cataloging Module (src/medal_description_engine.py)
+This engine indexes official honors, decorations, campaign medals, and ribbon order-of-precedence specifications, facilitating vector and relational lookups across jurisdictional award frameworks.
+import hashlib
+import json
+import logging
+import sqlite3
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, List
+
+import chromadb
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
+logger = logging.getLogger("MedalDescriptionEngine")
+
+
+@dataclass
+class MedalRecord:
+    award_id: str
+    jurisdiction: str
+    official_title: str
+    precedence_rank: int
+    ribbon_pattern: str
+    eligibility_criteria: str
+    cryptographic_hash: str
+
+
+class MedalDescriptionEngine:
+
+    def __init__(
+        self,
+        db_path: str = "records/legal_library.db",
+        vector_dir: str = "records/vector_store",
+    ):
+        self.db_path = Path(db_path)
+        self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        self.chroma_client = chromadb.PersistentClient(path=vector_dir)
+        self.collection = self.chroma_client.get_or_create_collection(
+            name="medals_decorations_catalog"
+        )
+        self._init_db()
+
+    def _init_db(self):
+        """Initializes SQLite database for honors and decorations."""
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS medals_decorations (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    award_id TEXT UNIQUE,
+                    jurisdiction TEXT,
+                    official_title TEXT,
+                    precedence_rank INTEGER,
+                    ribbon_pattern TEXT,
+                    eligibility_criteria TEXT,
+                    cryptographic_hash TEXT,
+                    verified BOOLEAN DEFAULT 1
+                )
+            """)
+            conn.commit()
+
+    def register_medal(
+        self,
+        award_id: str,
+        jurisdiction: str,
+        title: str,
+        precedence: int,
+        pattern: str,
+        criteria: str,
+    ):
+        """Indexes award metadata, computes SHA3-512 hash, and updates vector index."""
+        raw_payload = f"{award_id}:{jurisdiction}:{precedence}:{title}:{criteria}"
+        content_hash = hashlib.sha3_512(raw_payload.encode("utf-8")).hexdigest()
+
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                INSERT INTO medals_decorations (
+                    award_id, jurisdiction, official_title, precedence_rank,
+                    ribbon_pattern, eligibility_criteria, cryptographic_hash, verified
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+                ON CONFLICT(award_id) DO UPDATE SET
+                    official_title=excluded.official_title,
+                    precedence_rank=excluded.precedence_rank,
+                    eligibility_criteria=excluded.eligibility_criteria,
+                    cryptographic_hash=excluded.cryptographic_hash
+            """,
+                (
+                    award_id,
+                    jurisdiction.upper(),
+                    title,
+                    precedence,
+                    pattern,
+                    criteria,
+                    content_hash,
+                ),
+            )
+            conn.commit()
+
+        self.collection.upsert(
+            ids=[award_id],
+            documents=[f"{title} - Ribbon Pattern: {pattern}. {criteria}"],
+            metadatas=[{
+                "jurisdiction": jurisdiction.upper(),
+                "precedence": precedence,
+                "hash": content_hash,
+            }],
+        )
+
+    def query_decorations(
+        self, query: str, n_results: int = 3
+    ) -> List[Dict]:
+        """Semantic search across medal descriptions and criteria."""
+        results = self.collection.query(
+            query_texts=[query], n_results=n_results
+        )
+        formatted = []
+        if results and "ids" in results and results["ids"]:
+            for i, award_id in enumerate(results["ids"][0]):
+                meta = results["metadatas"][0][i]
+                doc = results["documents"][0][i]
+                formatted.append({
+                    "award_id": award_id,
+                    "jurisdiction": meta.get("jurisdiction"),
+                    "precedence_rank": meta.get("precedence"),
+                    "description": doc,
+                    "hash": meta.get("hash"),
+                })
+        return formatted
+
+5. X-Ray & Security Imaging Analytics Module (src/xray_analysis_engine.py)
+This module manages density signature classifications, atomic number (Z_{eff}) material classifications, organic/inorganic color mapping references, and anomaly detection logs for security screening systems.
+import hashlib
+import json
+import logging
+import sqlite3
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, List
+
+import chromadb
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
+logger = logging.getLogger("XRayAnalysisEngine")
+
+
+@dataclass
+class XRayScanRecord:
+    scan_id: str
+    location_code: str
+    effective_atomic_number: float  # Z_eff value
+    density_g_cm3: float
+    material_classification: str  # ORGANIC, INORGANIC, LIGHT_METAL, HEAVY_METAL
+    threat_flag: bool
+    diagnostic_summary: str
+    cryptographic_hash: str
+
+
+class XRayAnalysisEngine:
+
+    def __init__(
+        self,
+        db_path: str = "records/legal_library.db",
+        vector_dir: str = "records/vector_store",
+    ):
+        self.db_path = Path(db_path)
+        self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        self.chroma_client = chromadb.PersistentClient(path=vector_dir)
+        self.collection = self.chroma_client.get_or_create_collection(
+            name="xray_scan_diagnostics"
+        )
+        self._init_db()
+
+    def _init_db(self):
+        """Initializes SQLite database for radiographic security diagnostics."""
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS xray_scan_records (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    scan_id TEXT UNIQUE,
+                    location_code TEXT,
+                    effective_atomic_number REAL,
+                    density_g_cm3 REAL,
+                    material_classification TEXT,
+                    threat_flag BOOLEAN,
+                    diagnostic_summary TEXT,
+                    cryptographic_hash TEXT,
+                    verified BOOLEAN DEFAULT 1
+                )
+            """)
+            conn.commit()
+
+    def classify_material(
+        self, z_eff: float, density: float
+    ) -> str:
+        """Determines material classification based on Z_eff and density."""
+        if z_eff < 10.0:
+            return "ORGANIC"
+        elif 10.0 <= z_eff < 18.0:
+            return "INORGANIC_MIXED"
+        elif 18.0 <= z_eff < 29.0:
+            return "LIGHT_METAL"
+        else:
+            return "HEAVY_METAL"
+
+    def record_scan_analysis(
+        self,
+        scan_id: str,
+        location_code: str,
+        z_eff: float,
+        density: float,
+        threat_flag: bool,
+        diagnostic_summary: str,
+    ) -> Dict:
+        """Processes scan data, hashes parameters, updates local database and vector store."""
+        classification = self.classify_material(z_eff, density)
+        raw_payload = f"{scan_id}:{location_code}:{z_eff}:{density}:{classification}:{threat_flag}"
+        content_hash = hashlib.sha3_512(raw_payload.encode("utf-8")).hexdigest()
+
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                INSERT INTO xray_scan_records (
+                    scan_id, location_code, effective_atomic_number, density_g_cm3,
+                    material_classification, threat_flag, diagnostic_summary,
+                    cryptographic_hash, verified
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)
+                ON CONFLICT(scan_id) DO UPDATE SET
+                    effective_atomic_number=excluded.effective_atomic_number,
+                    density_g_cm3=excluded.density_g_cm3,
+                    material_classification=excluded.material_classification,
+                    threat_flag=excluded.threat_flag,
+                    diagnostic_summary=excluded.diagnostic_summary,
+                    cryptographic_hash=excluded.cryptographic_hash
+            """,
+                (
+                    scan_id,
+                    location_code,
+                    z_eff,
+                    density,
+                    classification,
+                    threat_flag,
+                    diagnostic_summary,
+                    content_hash,
+                ),
+            )
+            conn.commit()
+
+        self.collection.upsert(
+            ids=[scan_id],
+            documents=[
+                f"Location: {location_code} | Class: {classification} | Threat: {threat_flag} | {diagnostic_summary}"
+            ],
+            metadatas=[{
+                "z_eff": z_eff,
+                "density": density,
+                "threat_flag": threat_flag,
+                "hash": content_hash,
+            }],
+        )
+
+        return {
+            "scan_id": scan_id,
+            "classification": classification,
+            "threat_flag": threat_flag,
+            "hash": content_hash,
+        }
+
+    def search_threat_signatures(
+        self, query: str, n_results: int = 3
+    ) -> List[Dict]:
+        """Searches radiographic diagnostic logs by semantic threat indicators."""
+        results = self.collection.query(
+            query_texts=[query], n_results=n_results
+        )
+        formatted = []
+        if results and "ids" in results and results["ids"]:
+            for i, scan_id in enumerate(results["ids"][0]):
+                meta = results["metadatas"][0][i]
+                doc = results["documents"][0][i]
+                formatted.append({
+                    "scan_id": scan_id,
+                    "z_eff": meta.get("z_eff"),
+                    "density": meta.get("density"),
+                    "threat_flag": meta.get("threat_flag"),
+                    "diagnostic": doc,
+                    "hash": meta.get("hash"),
+                })
+        return formatted
+
+6. Comprehensive Test Suite (tests/test_modules.py)
+import shutil
+from pathlib import Path
+import pytest
+
+from src.lie_detection_engine import LieDetectionEngine
+from src.medal_description_engine import MedalDescriptionEngine
+from src.xray_analysis_engine import XRayAnalysisEngine
+
+TEST_DB = "records/test_hub.db"
+TEST_VECTOR = "records/test_hub_vector"
+
+
+@pytest.fixture(autouse=True)
+def setup_and_teardown():
+    Path("records").mkdir(exist_ok=True)
+    yield
+    if Path(TEST_DB).exists():
+        Path(TEST_DB).unlink()
+    if Path(TEST_VECTOR).exists():
+        shutil.rmtree(TEST_VECTOR)
+
+
+def test_lie_detection_module():
+    engine = LieDetectionEngine(db_path=TEST_DB, vector_dir=TEST_VECTOR)
+    res = engine.analyze_and_index_session(
+        session_id="SESS-001",
+        subject_id="SUBJ-ALPHA",
+        micro_expr=0.85,
+        gsr_var=8.2,
+        hrv_delta=-25.0,
+        verbal_score=0.90,
+        transcript="Subject displayed hesitation when asked about access keys.",
+    )
+    assert res["composite_deception_index"] > 0.5
+    search = engine.search_behavioral_patterns("hesitation access keys")
+    assert len(search) == 1
+    assert search[0]["session_id"] == "SESS-001"
+
+
+def test_medal_description_module():
+    engine = MedalDescriptionEngine(db_path=TEST_DB, vector_dir=TEST_VECTOR)
+    engine.register_medal(
+        award_id="MED-ALPHA-01",
+        jurisdiction="ALPHA",
+        title="Distinguished Service Cross",
+        precedence=2,
+        pattern="Blue with central red band flanked by gold thin stripes",
+        criteria="Awarded for extraordinary heroism in direct operational defense.",
+    )
+    search = engine.query_decorations("extraordinary heroism operational defense")
+    assert len(search) == 1
+    assert search[0]["award_id"] == "MED-ALPHA-01"
+
+
+def test_xray_analysis_module():
+    engine = XRayAnalysisEngine(db_path=TEST_DB, vector_dir=TEST_VECTOR)
+    res = engine.record_scan_analysis(
+        scan_id="SCAN-9901",
+        location_code="GATE-04",
+        z_eff=26.5,
+        density=7.87,
+        threat_flag=True,
+        diagnostic_summary="Concealed metallic mass detected matching high-density alloy profile.",
+    )
+    assert res["classification"] == "LIGHT_METAL"
+    search = engine.search_threat_signatures("concealed metallic mass")
+    assert len(search) == 1
+    assert search[0]["scan_id"] == "SCAN-9901"
+
+7. Master System Integration Entry Point (src/main.py)
+import json
+import logging
+from src.legal_library_engine import LegalLibraryEngine
+from src.lie_detection
